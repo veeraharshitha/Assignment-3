@@ -1,44 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Calculator</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="calculator">
-    <div id="operation-display">(none)</div>
-    <input type="text" id="display" placeholder="0" readonly />
+let display = document.getElementById('display');
+let operationDisplay = document.getElementById('operation-display');
+let currentInput = '';
+let operator = null;
+let firstOperand = null;
 
-    <div class="keys">
-      <button class="func" onclick="clearDisplay()">C</button>
-      <button class="func" onclick="backspace()">⌫</button>
-      <button class="operator" onclick="setOperator('%')">%</button>
-      <button class="operator" onclick="setOperator('/')">÷</button>
+function updateDisplay(value) {
+  display.value = value || '0';
+}
 
-      <button class="digit" onclick="appendNumber('7')">7</button>
-      <button class="digit" onclick="appendNumber('8')">8</button>
-      <button class="digit" onclick="appendNumber('9')">9</button>
-      <button class="operator" onclick="setOperator('*')">×</button>
+function updateOperatorDisplay() {
+  if (operator && firstOperand !== null) {
+    operationDisplay.innerText = `${firstOperand} ${operator}`;
+  } else {
+    operationDisplay.innerText = '(none)';
+  }
+}
 
-      <button class="digit" onclick="appendNumber('4')">4</button>
-      <button class="digit" onclick="appendNumber('5')">5</button>
-      <button class="digit" onclick="appendNumber('6')">6</button>
-      <button class="operator" onclick="setOperator('-')">−</button>
+function appendNumber(num) {
+  currentInput += num;
+  updateDisplay(currentInput);
+}
 
-      <button class="digit" onclick="appendNumber('1')">1</button>
-      <button class="digit" onclick="appendNumber('2')">2</button>
-      <button class="digit" onclick="appendNumber('3')">3</button>
-      <button class="operator" onclick="setOperator('+')">+</button>
+function clearDisplay() {
+  currentInput = '';
+  firstOperand = null;
+  operator = null;
+  updateDisplay('');
+  updateOperatorDisplay();
+}
 
-      <button class="digit" onclick="appendNumber('0')">0</button>
-      <button class="digit" onclick="appendNumber('.')">.</button>
-      <button class="func" onclick="factorial()">n!</button>
-      <button class="equals" onclick="calculate()">=</button>
-    </div>
-  </div>
+function backspace() {
+  currentInput = currentInput.slice(0, -1);
+  updateDisplay(currentInput);
+}
 
-  <script src="script.js"></script>
-</body>
-</html>
+function setOperator(op) {
+  if (currentInput === '') return;
+  firstOperand = parseFloat(currentInput);
+  operator = op;
+  currentInput = '';
+  updateOperatorDisplay();
+}
+
+function calculate() {
+  if (operator === null || currentInput === '') return;
+
+  let secondOperand = parseFloat(currentInput);
+  let result;
+
+  switch (operator) {
+    case '+': result = firstOperand + secondOperand; break;
+    case '-': result = firstOperand - secondOperand; break;
+    case '*': result = firstOperand * secondOperand; break;
+    case '/': result = secondOperand === 0 ? 'Error' : firstOperand / secondOperand; break;
+    case '%': result = (firstOperand * secondOperand) / 100; break;
+  }
+
+  updateDisplay(result);
+  currentInput = result.toString();
+  operator = null;
+  firstOperand = null;
+  updateOperatorDisplay();
+}
+
+function factorial() {
+  let num = parseFloat(currentInput);
+  if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+    updateDisplay("Err");
+    return;
+  }
+  let fact = 1;
+  for (let i = 2; i <= num; i++) fact *= i;
+  currentInput = fact.toString();
+  updateDisplay(currentInput);
+}
